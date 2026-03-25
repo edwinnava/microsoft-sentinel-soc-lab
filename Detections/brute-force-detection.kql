@@ -1,0 +1,5 @@
+SigninLogs
+| where TimeGenerated > ago(5m)
+| where ResultType == 50126
+| summarize FailedAttempts = count() by IPAddress, UserPrincipalName
+| where FailedAttempts >= 5
