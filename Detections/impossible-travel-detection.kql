@@ -1,0 +1,17 @@
+kql// Impossible Travel Detection - Analytics Rule
+// Lookback: 1 hour (rolling window for real-time detection)
+// Severity: High
+// Run frequency: Every 5 minutes
+
+let timeframe = 1h;
+SigninLogs
+| where TimeGenerated > ago(timeframe)
+| where ResultType == 0
+| project UserPrincipalName, TimeGenerated, IPAddress, Location
+| sort by UserPrincipalName asc, TimeGenerated asc
+| extend prevTime = prev(TimeGenerated), prevIP = prev(IPAddress), prevLocation = prev(Location)
+| where UserPrincipalName == prev(UserPrincipalName)
+| extend timeDiff = datetime_diff("minute", TimeGenerated, prevTime)
+| where timeDiff between (1 .. 60)
+| where IPAddress != prevIP
+| where Location != prevLocation
