@@ -80,6 +80,16 @@ SigninLogs
 | Entity mapping | Account → UserPrincipalName, IP → IPAddress |
 | Incident creation | Enabled |
 
+
+## MITRE ATT&CK Mapping
+
+| Detection Rule | Tactic | Technique | Technique ID |
+|----------------|--------|-----------|--------------|
+| Brute Force Login Detection | Credential Access | Brute Force | T1110 |
+| Impossible Travel Detection | Initial Access | Valid Accounts | T1078 |
+| Impossible Travel Detection | Defense Evasion | Use Alternate Authentication Material | T1550 |
+
+
 ---
 
 ## Analytics Rules
