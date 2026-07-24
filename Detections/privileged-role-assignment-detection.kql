@@ -1,0 +1,13 @@
+// Privileged Role Assignment Detection
+// Severity: High
+// Tactic: Privilege Escalation — T1078.004 (Valid Accounts: Cloud Accounts)
+// Run frequency: Every 5 minutes
+
+AuditLogs
+| where TimeGenerated > ago(1h)
+| where OperationName == "Add member to role"
+| extend InitiatedByUser = tostring(parse_json(InitiatedBy).user.userPrincipalName)
+| extend TargetUser = tostring(parse_json(tostring(TargetResources))[0].userPrincipalName)
+| extend RoleName = tostring(parse_json(tostring(TargetResources))[0].modifiedProperties[1].newValue)
+| project TimeGenerated, OperationName, InitiatedByUser, TargetUser, RoleName
+| where isnotempty(TargetUser)
