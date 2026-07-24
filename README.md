@@ -80,6 +80,30 @@ SigninLogs
 | Entity mapping | Account → UserPrincipalName, IP → IPAddress |
 | Incident creation | Enabled |
 
+### 3. Privileged Role Assignment Detection
+**Severity:** High  
+**Logic:** Detects when a user is added to a privileged role in Entra ID, which may indicate privilege escalation by an attacker who has gained initial access.
+
+```kql
+AuditLogs
+| where TimeGenerated > ago(1h)
+| where OperationName == "Add member to role"
+| extend InitiatedByUser = tostring(parse_json(InitiatedBy).user.userPrincipalName)
+| extend TargetUser = tostring(parse_json(tostring(TargetResources))[0].userPrincipalName)
+| extend RoleName = tostring(parse_json(tostring(TargetResources))[0].modifiedProperties[1].newValue)
+| project TimeGenerated, OperationName, InitiatedByUser, TargetUser, RoleName
+| where isnotempty(TargetUser)
+```
+
+| Setting | Value |
+|---------|-------|
+| Run frequency | Every 5 minutes |
+| Lookback window | 1 hour |
+| Alert threshold | Greater than 0 results |
+| Entity mapping | Account → InitiatedByUser, Account → TargetUser |
+| MITRE Tactic | Privilege Escalation |
+| MITRE Technique | T1078.004 — Valid Accounts: Cloud Accounts |
+| Incident creation | Enabled |
 
 ## MITRE ATT&CK Mapping
 
@@ -88,6 +112,7 @@ SigninLogs
 | Brute Force Login Detection | Credential Access | Brute Force | T1110 |
 | Impossible Travel Detection | Initial Access | Valid Accounts | T1078 |
 | Impossible Travel Detection | Defense Evasion | Use Alternate Authentication Material | T1550 |
+| Privileged Role Assignment Detection | Privilege Escalation | Valid Accounts: Cloud Accounts | T1078.004 |
 
 
 ---
@@ -132,6 +157,12 @@ Incident graph showing the socadmin account linked to the attacking IP address (
 Incident graph showing the socadmin account connected to 4 distinct IP addresses from different countries — all within a 19-minute window (9:26 PM to 9:45 PM on March 19, 2026).
 
 ![Impossible Travel Incident](Screenshots/ImpossibleTravelDetails.png)
+
+### Privileged Role Assignment Incident
+Incident graph showing the socadmin account flagged for privilege escalation. Sentinel automatically categorized the incident as "Privilege escalation" based on the MITRE ATT&CK tagging on the detection rule.
+
+![Privileged Role Incidents](Screenshots/PrivilegedRole_Incidents.png)
+![Privileged Role Detail](Screenshots/PrivilegedRole_Detail.png)
 
 ---
 
