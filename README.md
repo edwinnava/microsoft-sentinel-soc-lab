@@ -148,6 +148,34 @@ Both custom detection rules fired and generated incidents in Sentinel. Additiona
 
 ![Incident List](Screenshots/Incident_Detection.png)
 
+## Attack Automation (PowerShell)
+
+To make detection validation repeatable and documentable, a PowerShell script was developed to automate the privilege escalation simulation using the Microsoft Graph API.
+
+**Script:** `Scripts/Simulate-PrivilegeEscalation.ps1`
+
+**What it does:**
+- Authenticates to Microsoft Entra ID via Microsoft Graph
+- Looks up the target user and privileged role by name
+- Assigns the role to the target account
+- Waits 120 seconds for audit log ingestion
+- Automatically removes the role assignment
+
+**How to run it:**
+```powershell
+# Install the Microsoft Graph module (first time only)
+Install-Module Microsoft.Graph -Scope CurrentUser
+
+# Run the simulation
+& ".\Scripts\Simulate-PrivilegeEscalation.ps1"
+```
+
+**Result:** The script generates an AuditLog event that is picked up by the Privileged Role Assignment Detection rule within one run cycle, creating a High severity incident in Sentinel automatically.
+
+![PowerShell Automation](Screenshots/PowerShellAutomation.png)
+![KQL Sentinel Query](Screenshots/KQL_Sentinel.png)
+![Automated Simulation Incidents](Screenshots/AutomatedSimulation_Incidents.png)
+
 ### Brute Force Incident
 Incident graph showing the socadmin account linked to the attacking IP address (73.44.189.5). Activities tab recorded 6 alert events across the detection window.
 
@@ -228,5 +256,4 @@ microsoft-sentinel-soc-lab/
 ## Connect
 
 **Edwin Nava**  
-Aspiring Cloud Security Engineer  
 [LinkedIn](https://www.linkedin.com/in/edwinnava29/)
